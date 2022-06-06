@@ -39,19 +39,19 @@ public class CategoriaController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/nome_da_categoria/{nomecat}")
+	@GetMapping("/nomedacategoria/{nomeCat}")
 	public ResponseEntity<List<Categoria>> getByNomeCat(@PathVariable String nomeCat) {
 		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingIgnoreCaseOrderByNomeCat(nomeCat));
 	}
 	
-	/*Heroku aceita "_" no endpoint???*/
+	/*Heroku aceita "C em letra maiuscula" no endpoint???*/
 
 	@GetMapping("/tipo/{tipo}")
 	public ResponseEntity<List<Categoria>> getByTipo(@PathVariable String tipo) {
 		return ResponseEntity.ok(categoriaRepository.findAllByTipoContainingIgnoreCaseOrderByTipo(tipo));
 	}
 	
-	@GetMapping("/nome_da_categoria{nomecat}/tipo{tipo}")
+	@GetMapping("/nomedacategoria{nomeCat}/tipo{tipo}")
 	public ResponseEntity<List<Categoria>> getByNomeCatAndTipo(@PathVariable String nomeCat, @PathVariable String tipo) {
 		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingAndTipoContainingIgnoreCase(nomeCat, tipo));
 	}

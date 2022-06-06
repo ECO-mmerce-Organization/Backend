@@ -39,48 +39,44 @@ public class CategoriaController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/nomedacategoria/{nomeCat}")
-	public ResponseEntity<List<Categoria>> getByNomeCat(@PathVariable String nomeCat) {
-		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingIgnoreCaseOrderByNomeCat(nomeCat));
+	@GetMapping("/nomedacategoria/{nomecat}") //New test
+	public ResponseEntity<List<Categoria>> getByNomeCat(@PathVariable String nomecat) {
+		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingIgnoreCaseOrderByNomeCat(nomecat));
 	}
-	
-	/*Heroku aceita "C em letra maiuscula" no endpoint???*/
 
 	@GetMapping("/tipo/{tipo}")
 	public ResponseEntity<List<Categoria>> getByTipo(@PathVariable String tipo) {
 		return ResponseEntity.ok(categoriaRepository.findAllByTipoContainingIgnoreCaseOrderByTipo(tipo));
 	}
-	
-	@GetMapping("/nomedacategoria{nomeCat}/tipo{tipo}")
-	public ResponseEntity<List<Categoria>> getByNomeCatAndTipo(@PathVariable String nomeCat, @PathVariable String tipo) {
-		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingAndTipoContainingIgnoreCase(nomeCat, tipo));
+
+	@GetMapping("/nomedacategoria/{nomeCat}/tipo/{tipo}")
+	public ResponseEntity<List<Categoria>> getByNomeCatAndTipo(@PathVariable String nomeCat,
+			@PathVariable String tipo) {
+		List<Categoria> listCat = categoriaRepository.findAllByNomeCatContainingAndTipoContainingIgnoreCase(nomeCat,
+				tipo);
+		if (listCat.isEmpty())
+			return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(listCat);
 	}
-	
+
 	@PostMapping
 	public ResponseEntity<Categoria> postCategoria(@Valid @RequestBody Categoria categoria) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaRepository.save(categoria));
-		
-		//tratamento de erro???
-		
+
 	}
-		
+
 	@PutMapping
-	public ResponseEntity<Categoria> putCategoria (@Valid @RequestBody Categoria categoria) {
-		return categoriaRepository.findById(categoria.getId())
-				.map(resposta -> {
-					return ResponseEntity.ok().body(categoriaRepository.save(categoria));})
-				.orElse(ResponseEntity.notFound().build());
+	public ResponseEntity<Categoria> putCategoria(@Valid @RequestBody Categoria categoria) {
+		return categoriaRepository.findById(categoria.getId()).map(resposta -> {
+			return ResponseEntity.ok().body(categoriaRepository.save(categoria));
+		}).orElse(ResponseEntity.notFound().build());
 	}
-	
+
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteCategoria(@PathVariable Long id){
-		return categoriaRepository.findById(id)
-				.map(resposta -> {
-					categoriaRepository.deleteById(id);
-					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-				})
-				.orElse (ResponseEntity.notFound().build());
+	public ResponseEntity<?> deleteCategoria(@PathVariable Long id) {
+		return categoriaRepository.findById(id).map(resposta -> {
+			categoriaRepository.deleteById(id);
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		}).orElse(ResponseEntity.notFound().build());
 	}
-	
-	//Por que interrogação e não <Categoria>. Qual a diferença??
 }

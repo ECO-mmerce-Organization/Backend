@@ -50,7 +50,6 @@ public class Produto {
 	private Categoria categoria;
 	
 	
-
 	public String getNomeProd() {
 		return nomeProd;
 	}

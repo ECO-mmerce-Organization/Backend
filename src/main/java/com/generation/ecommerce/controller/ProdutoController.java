@@ -1,6 +1,7 @@
 package com.generation.ecommerce.controller;
 
 import java.math.BigDecimal;
+
 import java.util.List;
 
 import javax.validation.Valid;
@@ -21,72 +22,81 @@ import org.springframework.web.bind.annotation.RestController;
 import com.generation.ecommerce.model.Produto;
 import com.generation.ecommerce.repository.CategoriaRepository;
 import com.generation.ecommerce.repository.ProdutoRepository;
+import com.generation.ecommerce.repository.UsuarioRepository;
 
 @RestController
 @RequestMapping("/produtos")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ProdutoController {
-	
+
 	@Autowired
 	private ProdutoRepository produtoRepository;
-	
+
 	@Autowired
 	private CategoriaRepository categoriaRepository;
-	
+
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+
 	@GetMapping
 	public ResponseEntity<List<Produto>> getAll() {
 		return ResponseEntity.ok(produtoRepository.findAll());
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Produto> getById(@PathVariable Long id) {
 		return produtoRepository.findById(id).map(resposta -> ResponseEntity.ok(resposta))
 				.orElse(ResponseEntity.notFound().build());
 	}
-	
-	@GetMapping("/nomedoproduto/{nomeProd}") //New test
+
+	@GetMapping("/nomedoproduto/{nomeProd}") // New test
 	public ResponseEntity<List<Produto>> getByNomeProd(@PathVariable String nomeProd) {
 		List<Produto> listProd = produtoRepository.findAllByNomeProdContainingIgnoreCaseOrderByNomeProd(nomeProd);
-		if(listProd.isEmpty())
+		if (listProd.isEmpty())
 			return ResponseEntity.notFound().build();
 		return ResponseEntity.ok(listProd);
-	}
-	
-	@GetMapping("/valorinicial/{inicio}/valorfinal/{fim}")
-	public ResponseEntity <List<Produto>> getByPrecoBetween(@PathVariable BigDecimal inicio, @PathVariable BigDecimal fim){
-		List<Produto> listProd = produtoRepository.findAllByPrecoBetween(inicio, fim);
-		if(listProd.isEmpty())
-			return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(listProd);
-	}
-	
-	@PostMapping
-	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
-	 boolean prod = categoriaRepository.existsById(produto.getCategoria().getId());
-	 if(prod != true)
-		 return ResponseEntity.notFound().build();
-	 return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
-		
-	}
-	
-	@PutMapping
-	public ResponseEntity<Produto> putProduto(@Valid @RequestBody Produto produto) {
-			if(produtoRepository.existsById(produto.getId())) {
-				if(categoriaRepository.existsById(produto.getCategoria().getId())) 
-					return ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produto));
-					
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-				}
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	}
-	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteProduto(@PathVariable Long id) {
-		return produtoRepository.findById(id).map(resposta -> {
-			produtoRepository.deleteById(id);
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-		}).orElse(ResponseEntity.notFound().build());
 	}
 
-	
+	@GetMapping("/valorinicial/{inicio}/valorfinal/{fim}")
+	public ResponseEntity<List<Produto>> getByPrecoBetween(@PathVariable BigDecimal inicio,
+			@PathVariable BigDecimal fim) {
+		List<Produto> listProd = produtoRepository.findAllByPrecoBetween(inicio, fim);
+		if (listProd.isEmpty())
+			return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(listProd);
+	}
+
+	@PostMapping
+	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
+		boolean prod = categoriaRepository.existsById(produto.getCategoria().getId());
+		if (prod == true && produto.getUsuario().isOng())
+			return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
+		return ResponseEntity.notFound().build();
+		// Se tem como autorizar somente a Ong(boolean) de acessar o PUT e POST.
+	}
+
+	@PutMapping
+	public ResponseEntity<Produto> putProduto(@Valid @RequestBody Produto produto) {
+		if (produtoRepository.existsById(produto.getId()) && produto.getUsuario().isOng()) {
+			if (categoriaRepository.existsById(produto.getCategoria().getId()))
+				return ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produto));
+
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteProduto(@PathVariable Long id, Produto produto) {
+		if (produto.getUsuario().isOng()) {
+			return produtoRepository.findById(id)
+					.map(resposta -> {
+						produtoRepository.deleteById(id);	
+						return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+					})
+		
+					.orElse(ResponseEntity.notFound().build());
+		}
+        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+}
 }

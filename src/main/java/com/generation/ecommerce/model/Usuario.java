@@ -104,6 +104,5 @@ public class Usuario {
 		this.ong = ong;
 	}
 	
-	
 
 }

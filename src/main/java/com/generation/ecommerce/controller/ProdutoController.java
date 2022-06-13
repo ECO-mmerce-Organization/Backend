@@ -1,8 +1,8 @@
 package com.generation.ecommerce.controller;
 
 import java.math.BigDecimal;
-
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.generation.ecommerce.model.Produto;
+import com.generation.ecommerce.model.Usuario;
 import com.generation.ecommerce.repository.CategoriaRepository;
 import com.generation.ecommerce.repository.ProdutoRepository;
 import com.generation.ecommerce.repository.UsuarioRepository;
@@ -66,15 +67,26 @@ public class ProdutoController {
 		return ResponseEntity.ok(listProd);
 	}
 
-	@PostMapping
+	/*@PostMapping
 	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
 		boolean prod = categoriaRepository.existsById(produto.getCategoria().getId());
 		if (prod == true && produto.getUsuario().isOng())
 			return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
 		return ResponseEntity.notFound().build();
 		// Se tem como autorizar somente a Ong(boolean) de acessar o PUT e POST.
-	}
+	}*/
 
+	@PostMapping
+	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
+		if (categoriaRepository.existsById(produto.getCategoria().getId())) {
+			Optional<Usuario> checarUser = usuarioRepository.BuscarOng(produto.getUsuario().getId());
+			if (checarUser.isPresent())
+				return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
+		}
+		return ResponseEntity.badRequest().build();
+	}
+	
+	
 	@PutMapping
 	public ResponseEntity<Produto> putProduto(@Valid @RequestBody Produto produto) {
 		if (produtoRepository.existsById(produto.getId()) && produto.getUsuario().isOng()) {
@@ -84,8 +96,8 @@ public class ProdutoController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	}
-
+	}	
+	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteProduto(@PathVariable Long id, Produto produto) {
 		if (produto.getUsuario().isOng()) {
@@ -94,7 +106,6 @@ public class ProdutoController {
 						produtoRepository.deleteById(id);	
 						return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 					})
-		
 					.orElse(ResponseEntity.notFound().build());
 		}
         	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

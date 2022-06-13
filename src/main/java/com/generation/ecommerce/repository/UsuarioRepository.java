@@ -16,6 +16,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	public Optional<Usuario> findByUsuario(String usuario);
 	public List<Usuario> findByOngTrue();
 	
+	//public Optional<Usuario> findByIdAndOngTrue(Long id);
+	
 	@Query (value = "select * from tb_usuarios where id = :id and is_ong = true", nativeQuery = true)
 	public Optional<Usuario> BuscarOng (@Param("id") Long id);
 

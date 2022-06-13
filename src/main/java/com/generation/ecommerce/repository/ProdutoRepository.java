@@ -15,4 +15,6 @@ public interface ProdutoRepository extends JpaRepository <Produto, Long> {
 	public List <Produto> findAllByNomeProdContainingIgnoreCaseOrderByNomeProd (@Param("nomeProd") String nomeProd);
 
 	public List <Produto> findAllByPrecoBetween (@Param("inicio") BigDecimal inicio, @Param("fim") BigDecimal fim); 
+	
+	
 }

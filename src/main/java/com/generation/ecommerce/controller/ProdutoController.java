@@ -67,14 +67,15 @@ public class ProdutoController {
 		return ResponseEntity.ok(listProd);
 	}
 
-	/*@PostMapping
-	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
-		boolean prod = categoriaRepository.existsById(produto.getCategoria().getId());
-		if (prod == true && produto.getUsuario().isOng())
-			return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
-		return ResponseEntity.notFound().build();
-		// Se tem como autorizar somente a Ong(boolean) de acessar o PUT e POST.
-	}*/
+	/*
+	 * @PostMapping public ResponseEntity<Produto> postProduto(@Valid @RequestBody
+	 * Produto produto) { boolean prod =
+	 * categoriaRepository.existsById(produto.getCategoria().getId()); if (prod ==
+	 * true && produto.getUsuario().isOng()) return
+	 * ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto
+	 * )); return ResponseEntity.notFound().build(); // Se tem como autorizar
+	 * somente a Ong(boolean) de acessar o PUT e POST. }
+	 */
 
 	@PostMapping
 	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
@@ -85,29 +86,38 @@ public class ProdutoController {
 		}
 		return ResponseEntity.badRequest().build();
 	}
-	
-	
+
 	@PutMapping
 	public ResponseEntity<Produto> putProduto(@Valid @RequestBody Produto produto) {
-		if (produtoRepository.existsById(produto.getId()) && produto.getUsuario().isOng()) {
-			if (categoriaRepository.existsById(produto.getCategoria().getId()))
-				return ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produto));
-
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		if (categoriaRepository.existsById(produto.getCategoria().getId())) {
+			Optional<Usuario> checarUser = usuarioRepository.BuscarOng(produto.getUsuario().getId());
+			if (checarUser.isPresent())
+				return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	}	
-	
+		return ResponseEntity.badRequest().build();
+	}
+
+	/*
+	 * Optional<Usuario> checarUser =
+	 * usuarioRepository.BuscarOng(produto.getUsuario().getId()); if
+	 * (produtoRepository.existsById(produto.getId()) && checarUser.isPresent()) {
+	 * if (categoriaRepository.existsById(produto.getCategoria().getId())) return
+	 * ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produto));
+	 * return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); } return
+	 * ResponseEntity.status(HttpStatus.NOT_FOUND).build(); }
+	 */
+
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteProduto(@PathVariable Long id, Produto produto) {
-		if (produto.getUsuario().isOng()) {
-			return produtoRepository.findById(id)
+	public ResponseEntity<?> deleteProduto(@PathVariable Long id) {
+		Optional<Produto> prod = produtoRepository.findById(id);
+		if (prod.isPresent()) {
+			return usuarioRepository.findById(prod.get().getUsuario().getId())
 					.map(resposta -> {
-						produtoRepository.deleteById(id);	
+						produtoRepository.deleteById(prod.get().getId());
 						return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 					})
 					.orElse(ResponseEntity.notFound().build());
 		}
-        	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+	}
 }

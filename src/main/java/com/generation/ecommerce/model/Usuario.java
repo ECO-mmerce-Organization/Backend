@@ -17,18 +17,21 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Entity
 @Table(name = "tb_usuarios")
 public class Usuario {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long Id;
+	private Long id;
 	
 	@NotBlank(message = "É obrigatório o preenchimento e não pode conter apenas espaço em branco!")
 	@Size(min = 5, max = 255, message = "O atributo deve conter no mínimo 5 e no máximo 255 caracteres!")
 	private String nome;
 	
+	@Schema(example = "email@email.com.br")
 	@NotNull(message = "É obrigatório o preenchimento do atributo usuario")
 	@Email(message = "O atributo usuário deve ser um e-mail!")
 	private String usuario;
@@ -57,11 +60,11 @@ public class Usuario {
 	}
 
 	public Long getId() {
-		return Id;
+		return id;
 	}
 
 	public void setId(Long id) {
-		Id = id;
+		this.id = id;
 	}
 
 	public String getNome() {

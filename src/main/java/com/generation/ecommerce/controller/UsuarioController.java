@@ -70,14 +70,14 @@ public class UsuarioController {
 				.orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<?> deletePostagem(@PathVariable Long id) {
+	/*@DeleteMapping("/delete/{id}")
+	public ResponseEntity<?> deleteUsuario(@PathVariable Long id) {
 
 		return usuarioRepository.findById(id).map(resposta -> {
 			usuarioRepository.deleteById(id);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		}).orElse(ResponseEntity.notFound().build());
-	}
+	}*/
     
 	@GetMapping("/ong")
 	public ResponseEntity<List<Usuario>>getOng(){

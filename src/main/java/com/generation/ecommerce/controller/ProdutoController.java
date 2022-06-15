@@ -67,20 +67,10 @@ public class ProdutoController {
 		return ResponseEntity.ok(listProd);
 	}
 
-	/*
-	 * @PostMapping public ResponseEntity<Produto> postProduto(@Valid @RequestBody
-	 * Produto produto) { boolean prod =
-	 * categoriaRepository.existsById(produto.getCategoria().getId()); if (prod ==
-	 * true && produto.getUsuario().isOng()) return
-	 * ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto
-	 * )); return ResponseEntity.notFound().build(); // Se tem como autorizar
-	 * somente a Ong(boolean) de acessar o PUT e POST. }
-	 */
-
 	@PostMapping
 	public ResponseEntity<Produto> postProduto(@Valid @RequestBody Produto produto) {
 		if (categoriaRepository.existsById(produto.getCategoria().getId())) {
-			Optional<Usuario> checarUser = usuarioRepository.BuscarOng(produto.getUsuario().getId());
+			Optional<Usuario> checarUser = usuarioRepository.findByIdAndOngTrue(produto.getUsuario().getId());
 			if (checarUser.isPresent())
 				return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
 		}
@@ -90,9 +80,9 @@ public class ProdutoController {
 	@PutMapping
 	public ResponseEntity<Produto> putProduto(@Valid @RequestBody Produto produto) {
 		if (categoriaRepository.existsById(produto.getCategoria().getId())) {
-			Optional<Usuario> checarUser = usuarioRepository.BuscarOng(produto.getUsuario().getId());
+			Optional<Usuario> checarUser = usuarioRepository.findByIdAndOngTrue(produto.getUsuario().getId());
 			if (checarUser.isPresent())
-				return ResponseEntity.status(HttpStatus.CREATED).body(produtoRepository.save(produto));
+				return ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produto));
 		}
 		return ResponseEntity.badRequest().build();
 	}

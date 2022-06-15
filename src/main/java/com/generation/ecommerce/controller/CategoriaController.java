@@ -30,7 +30,11 @@ public class CategoriaController {
 
 	@GetMapping
 	public ResponseEntity<List<Categoria>> getAll() {
-		return ResponseEntity.ok(categoriaRepository.findAll());
+		List<Categoria> cat = categoriaRepository.findAll();
+		if(!cat.isEmpty()) {
+			return ResponseEntity.ok(categoriaRepository.findAll());
+		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/{id}")
@@ -39,21 +43,28 @@ public class CategoriaController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 
-	@GetMapping("/nomedacategoria/{nomecat}") //New test
+	@GetMapping("/nomedacategoria/{nomecat}")
 	public ResponseEntity<List<Categoria>> getByNomeCat(@PathVariable String nomecat) {
-		return ResponseEntity.ok(categoriaRepository.findAllByNomeCatContainingIgnoreCaseOrderByNomeCat(nomecat));
+		List<Categoria> cat = categoriaRepository.findAllByNomeCatContainingIgnoreCaseOrderByNomeCat(nomecat);
+		if(!cat.isEmpty()) {
+			return ResponseEntity.ok(categoriaRepository.findAll());
+		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/tipo/{tipo}")
 	public ResponseEntity<List<Categoria>> getByTipo(@PathVariable String tipo) {
-		return ResponseEntity.ok(categoriaRepository.findAllByTipoContainingIgnoreCaseOrderByTipo(tipo));
+		List<Categoria> cat = categoriaRepository.findAllByTipoContainingIgnoreCaseOrderByTipo(tipo);
+		if(!cat.isEmpty()) {
+			return ResponseEntity.ok(categoriaRepository.findAll());
+		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/nomedacategoria/{nomeCat}/tipo/{tipo}")
 	public ResponseEntity<List<Categoria>> getByNomeCatAndTipo(@PathVariable String nomeCat,
 			@PathVariable String tipo) {
-		List<Categoria> listCat = categoriaRepository.findAllByNomeCatContainingAndTipoContainingIgnoreCase(nomeCat,
-				tipo);
+		List<Categoria> listCat = categoriaRepository.findAllByNomeCatContainingAndTipoContainingIgnoreCase(nomeCat, tipo);
 		if (listCat.isEmpty())
 			return ResponseEntity.notFound().build();
 		return ResponseEntity.ok(listCat);
@@ -74,9 +85,10 @@ public class CategoriaController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteCategoria(@PathVariable Long id) {
-		return categoriaRepository.findById(id).map(resposta -> {
-			categoriaRepository.deleteById(id);
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+		return categoriaRepository.findById(id)
+				.map(resposta -> {
+					categoriaRepository.deleteById(id);
+					return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		}).orElse(ResponseEntity.notFound().build());
 	}
 }

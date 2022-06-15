@@ -39,14 +39,19 @@ public class ProdutoController {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
-	@GetMapping
+	@GetMapping ("/all")
 	public ResponseEntity<List<Produto>> getAll() {
-		return ResponseEntity.ok(produtoRepository.findAll());
+		List<Produto> prod = produtoRepository.findAll();
+		if(!prod.isEmpty()) {
+			return ResponseEntity.ok(produtoRepository.findAll());
+		}
+		return ResponseEntity.notFound().build();
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Produto> getById(@PathVariable Long id) {
-		return produtoRepository.findById(id).map(resposta -> ResponseEntity.ok(resposta))
+		return produtoRepository.findById(id)
+				.map(resposta -> ResponseEntity.ok(resposta))
 				.orElse(ResponseEntity.notFound().build());
 	}
 

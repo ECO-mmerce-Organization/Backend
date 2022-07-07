@@ -25,6 +25,9 @@ public class UsuarioService {
 		if (usuarioRepository.findByUsuario(usuario.getUsuario()).isPresent())
 			return Optional.empty();
 
+		if (usuario.getFoto() == null)
+			usuario.setFoto("https://i.imgur.com/Zz4rzVR.png");
+
 		if (usuario.getFoto().isBlank())
 			usuario.setFoto("https://i.imgur.com/Zz4rzVR.png");
 
